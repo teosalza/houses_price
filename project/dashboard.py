@@ -1,5 +1,5 @@
 from tkinter.ttk import Style
-from dash import html, dcc, Dash, dash_table, Input, Output
+from dash import html, dcc, Dash, dash_table, Input, Output, State
 import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
@@ -46,7 +46,7 @@ fig = px.bar(df, x="Fruit", y="Amount", color="City", barmode="group")
 app.layout = html.Div(children=[
     html.Div(children=[  
         html.H1(children='Houses Price'),
-        html.H4(children="Analisys on houses development from 1872 to 2010"),
+        html.H4(children="Analisys on houses built from 1872 to 2010"),
        
         #Description table
         html.Div(children=[
@@ -76,7 +76,7 @@ app.layout = html.Div(children=[
         ],style={"padding":"15px", "border":"1px solid rgb(54 54 54)","border-radius":"3px", "margin-bottom":"50px","background-color":"#252e3f"}),
 
         html.Div(children=[
-            html.Div(children=""),
+            html.H3(children="Stastistics per year houses built"),
             html.Div(children=[
                 #container
                 html.Div(children=[
@@ -94,7 +94,7 @@ app.layout = html.Div(children=[
                             figure= fn.hpr_ap
                         )                    
                     ],style={"flex-grow":"2"}),
-                ],style={"display":"flex","justify-content":"center","padding":"15px", "border":"1px solid rgb(54 54 54)","border-radius":"3px", "margin-bottom":"20px","background-color":"#252e3f"}),
+                ],style={"display":"flex","justify-content":"center"}),
                 #slider
                 html.Div(children=[
                      dcc.RangeSlider(id="hpr_ap_rg",
@@ -112,9 +112,101 @@ app.layout = html.Div(children=[
                                     },
                                     value=[1872,2010])
 
-                ],style={"padding":"15px", "border":"1px solid rgb(54 54 54)","border-radius":"3px", "margin-bottom":"50px","background-color":"#252e3f"})
+                ],style={"padding":"15px","margin-top":"20px"})
             ])
-        ]),
+        ],style={"padding":"15px", "border":"1px solid rgb(54 54 54)","border-radius":"3px", "margin-bottom":"50px","background-color":"#252e3f"}),
+        
+        #Correlation description
+        html.Div(children=[
+            html.H3(children="Correlation between features and SalePrice"),
+            html.Div(children=[
+                #One-hot-encoding correlazion
+                html.Div(children=[
+                    dcc.Graph(
+                            id='ohe_graph',
+                            figure=fn.ohe_corr                         
+                        )
+                ],style={"flex-grow":"1"}),
+                #Label encoding correlation
+                html.Div(children=[
+                    dcc.Graph(
+                            id='le_graph',
+                            figure=fn.label_enc_corr                         
+                        )
+                ],style={"flex-grow":"2"}),
+                
+            ],style={"display":"flex","justify-content":"center"}),
+            #Scatter correlation
+            html.Div(children=[
+                    dcc.Graph(
+                            id='scatter_corr_graph',
+                            figure=fn.scatter_corr                         
+                        )
+                ],style={"margin-top":"25px","display":"flex","justify-content":"center"}),
+        ],style={"padding":"15px", "border":"1px solid rgb(54 54 54)","border-radius":"3px", "margin-bottom":"20px","background-color":"#252e3f"}),
+
+        #Models application
+        html.Div(children=[
+            html.H3(children="Application of statistic models"),
+            html.Div(children=[
+                #Lr model
+                html.Div(children=[
+                    html.H5(children="Linear Regression Model"),
+                    html.Div(children=[
+                        dash_table.DataTable(fn.lr_data_errors.to_dict('records'), [{"name": i, "id": i} for i in fn.lr_data_errors.columns], 
+                                style_cell={"color":"black"}),
+                        ],style={"padding-right":"50px","padding-left":"50px","flow-grow":"4"}),
+                    html.H6(children=fn.lr_score,style={"margin-top":"10px"}),
+                ]),
+                #Rfr model
+                html.Div(children=[
+                    html.H5(children="Random Forest Regressor Model"),
+                    html.Div(children=[
+                        dash_table.DataTable(fn.rfr_data_errors.to_dict('records'), [{"name": i, "id": i} for i in fn.rfr_data_errors.columns], 
+                                style_cell={"color":"black"}),
+                        ],style={"padding-right":"50px","padding-left":"50px","flow-grow":"4"}),
+                    html.H6(children=fn.rfr_score,style={"margin-top":"10px"}),
+                ]),
+                #Dtr model
+                html.Div(children=[
+                    html.H5(children="Decision Tree Regressor Model"),
+                    html.Div(children=[
+                        dash_table.DataTable(fn.dtr_data_errors.to_dict('records'), [{"name": i, "id": i} for i in fn.dtr_data_errors.columns], 
+                                style_cell={"color":"black"}),
+                        ],style={"padding-right":"50px","padding-left":"50px","flow-grow":"4"}),
+                    html.H6(children=fn.dtr_score,style={"margin-top":"10px"}),
+                ]),
+                html.Div(children=[]),
+                html.Div(children=[]),
+            ],style={"display":"flex","justify-content":"center"}),
+        ],style={"padding":"15px", "border":"1px solid rgb(54 54 54)","border-radius":"3px", "margin-bottom":"50px","background-color":"#252e3f"}),
+
+        #Estimate your house price
+        html.Div(children=[
+            html.H3(children="Estimate your house price"),
+            html.Div(children=[
+                html.Div(children=[
+                    html.Div(children=[
+                        "Year Built: ",dcc.Input(id='yb-input', value='', type='number',min=1873,style={"width":"80px","margin-right":"20px","border-radius":"8px","margin-bottom":"10px","margin-left":"5px"}),
+                        "Room above grade: ",dcc.Input(id='trag-input', value='', type='number',min=1, max=15,style={"width":"80px","margin-right":"20px","border-radius":"8px","margin-bottom":"10px","margin-left":"5px"}),
+                        "Fireplaces:",dcc.Input(id='fp-input', value='', type='number',max=3,style={"width":"80px","margin-right":"20px","border-radius":"8px","margin-bottom":"10px","margin-left":"5px"}),
+                        "Bathrooms:",dcc.Input(id='br-input', value='', type='number',max=4,style={"width":"80px","margin-right":"20px","border-radius":"8px","margin-bottom":"10px","margin-left":"5px"}),
+                        "1st Floor sqrft:",dcc.Input(id='fsf-input', value='', type='number',style={"width":"80px","margin-right":"20px","border-radius":"8px","margin-bottom":"10px","margin-left":"5px"}),
+                        "Basement sqrft:",dcc.Input(id='bsf-input', value='', type='number',style={"width":"80px","margin-right":"20px","border-radius":"8px","margin-bottom":"10px","margin-left":"5px"}),
+                        "Garage area:",dcc.Input(id='ga-input', value='', type='number',style={"width":"80px","margin-right":"20px","border-radius":"8px","margin-bottom":"10px","margin-left":"5px"}),
+                        "Garage cars:",dcc.Input(id='gc-input', value='', type='number',max=5,style={"width":"80px","margin-right":"20px","border-radius":"8px","margin-bottom":"10px","margin-left":"5px"}),
+                        "Above grade living area:",dcc.Input(id='la-input', value='', type='number',style={"width":"80px","margin-right":"20px","border-radius":"8px","margin-bottom":"10px","margin-left":"5px"}),
+                        "Overall quality:",dcc.Input(id='oq-input', value='', type='number',min=1,max=10,style={"width":"80px","margin-right":"20px","border-radius":"8px","margin-bottom":"10px","margin-left":"5px"}),
+                        "Zone: ",dcc.Dropdown(fn.list_mszoning, 'Commercial', id="zn-input",style={"color":"black","width":"350px","margin-right":"20px","border-radius":"8px","margin-bottom":"10px","margin-left":"5px"})
+                    ]),
+                    html.Div(children=[
+                        html.Button('Submit', id='submit-val', n_clicks=0,style={"border":"0px","border-radius":"3px","width":"75px","height":"45px","background-color":"#ababab"}),
+                    ],style={"display":"flex","justify-content":"center"}),
+                ],style={"width":"85%"}),
+                html.H5(children="Test", id="price-result"),
+            ],style={"display":"flex","justify-content":"center"}),
+        ],style={"padding":"15px", "border":"1px solid rgb(54 54 54)","border-radius":"3px", "margin-bottom":"50px","background-color":"#252e3f"}),
+
 
         html.Div(children='''
             Dash: A web application framework for your data.
@@ -135,7 +227,35 @@ def update_hpy_ap_graph(year_choosen):
 def update_hpy_graph(year_choosen):
     return fn.get_data_hpr(fn.clean_data,year_choosen[0],year_choosen[1])
 
-
+@app.callback(Output(component_id="price-result",component_property="children"),
+                State('yb-input', 'value'),
+                State('trag-input', 'value'),
+                State('fp-input', 'value'),
+                State('br-input', 'value'),
+                State('fsf-input', 'value'),
+                State('bsf-input', 'value'),
+                State('ga-input', 'value'),
+                State('gc-input', 'value'),
+                State('la-input', 'value'),
+                State('oq-input', 'value'),
+                State('zn-input', 'value'),
+                Input('submit-val', 'n_clicks')
+                )
+def update_input_selection(yb_val,trag_val,fp_val,br_val,fsf_val,bsf_val,ga_val,gc_val,la_val,oq_val,zn_val,sub):
+    print("---")
+    print("yb "+str(yb_val))
+    print("trag "+ str(trag_val))
+    print("fp "+ str(fp_val))
+    print("br "+ str(br_val))
+    print("fsf "+ str(fsf_val))
+    print("bsf "+ str(bsf_val))
+    print("ga "+ str(ga_val))
+    print("gc "+ str(gc_val))
+    print("la "+ str(la_val))
+    print("oq "+ str(oq_val))
+    print("zn "+ str(zn_val))
+    print("---")
+    return f'Output: {yb_val}'
 
 
 if __name__ == '__main__':
