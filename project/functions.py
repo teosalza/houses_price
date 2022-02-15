@@ -21,6 +21,7 @@ def clean_dataset(dataset):
     new_data = new_data.drop("YearRemodAdd",axis=1)
     return new_data
 
+
 #Graph number of house per year and average price
 def get_data_hpr_ap(new_data,start,end):
     houses_per_year = new_data.groupby("YearBuilt").count()["SalePrice"]
@@ -68,6 +69,9 @@ def get_data_hpr(new_data,start,end):
         title="Numero di case per zona ",
         labels={'count':'Numero Case','YearBuilt':'Anno construzione'})
     return fig2
+
+
+
 
 
 #global variable for front-end
