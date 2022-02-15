@@ -1,3 +1,4 @@
+import gc
 from tkinter.ttk import Style
 from dash import html, dcc, Dash, dash_table, Input, Output, State
 import plotly.graph_objects as go
@@ -32,17 +33,6 @@ app.title ="Houses Price"
 defaultLayout = go.Layout(
       autosize=True)
 
-#call to external file function
-
-
-df = pd.DataFrame({
-    "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
-    "Amount": [4, 1, 2, 2, 4, 5],
-    "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
-})
-
-fig = px.bar(df, x="Fruit", y="Amount", color="City", barmode="group")
-
 app.layout = html.Div(children=[
     html.Div(children=[  
         html.H1(children='Houses Price'),
@@ -66,15 +56,16 @@ app.layout = html.Div(children=[
                     html.H6(children="  -OverallQual: Rates the overall material and finish of the house",style={"padding-left":"15px"}),
                     html.H6(children="  -SalePrice: ",style={"padding-left":"15px"}),
                     html.H6(children="  -MSZoning: Identifies the general zoning classification of the sale.",style={"padding-left":"15px"}),
-                ],style={"flow-grow":"0"}),
+                ],style={"flow-grow":"1"}),
                 html.Div(children=[
                  dash_table.DataTable(fn.demo_data.to_dict('records'), [{"name": i, "id": i} for i in fn.demo_data.columns], 
                         style_cell={"color":"black"}),
-                ],style={"padding-right":"50px","padding-left":"50px","flow-grow":"4"})
-            ],style={"display":"flex","justify-content":"space-between","order":"5"}),
+                ],style={"padding-right":"50px","padding-left":"50px","flow-grow":"2"})
+            ],style={"display":"flex","justify-content":"space-between","order":"3"}),
             
         ],style={"padding":"15px", "border":"1px solid rgb(54 54 54)","border-radius":"3px", "margin-bottom":"50px","background-color":"#252e3f"}),
 
+        #Statistical info
         html.Div(children=[
             html.H3(children="Stastistics per year houses built"),
             html.Div(children=[
@@ -84,7 +75,7 @@ app.layout = html.Div(children=[
                     html.Div(children=[
                         dcc.Graph(
                             id='hpy_graph',
-                            figure=fig                         
+                            figure=fn.hpr                         
                         )
                     ],style={"flex-grow":"1"}),
                     #House per Year average price
@@ -206,16 +197,7 @@ app.layout = html.Div(children=[
                 html.H5(children="Test", id="price-result"),
             ],style={"display":"flex","justify-content":"center"}),
         ],style={"padding":"15px", "border":"1px solid rgb(54 54 54)","border-radius":"3px", "margin-bottom":"50px","background-color":"#252e3f"}),
-
-
-        html.Div(children='''
-            Dash: A web application framework for your data.
-        '''),
-        dcc.Graph(
-            id='example-graph',
-            figure=fig
-        )],style={"width":"75%"})
-  
+    ],style={"width":"75%"})
 ], style={"display":"flex", "justify-content":"center"})
 
 
@@ -242,20 +224,10 @@ def update_hpy_graph(year_choosen):
                 Input('submit-val', 'n_clicks')
                 )
 def update_input_selection(yb_val,trag_val,fp_val,br_val,fsf_val,bsf_val,ga_val,gc_val,la_val,oq_val,zn_val,sub):
-    print("---")
-    print("yb "+str(yb_val))
-    print("trag "+ str(trag_val))
-    print("fp "+ str(fp_val))
-    print("br "+ str(br_val))
-    print("fsf "+ str(fsf_val))
-    print("bsf "+ str(bsf_val))
-    print("ga "+ str(ga_val))
-    print("gc "+ str(gc_val))
-    print("la "+ str(la_val))
-    print("oq "+ str(oq_val))
-    print("zn "+ str(zn_val))
-    print("---")
-    return f'Output: {yb_val}'
+    #data = np.array([fp_val,yb_val,trag_val,br_val,fsf_val,bsf_val,ga_val,gc_val,la_val,oq_val,fn.le_mapping[fn.diz_mszoning[zn_val]]])
+    data = np.array(['2','1939','5','1','1077','991','205','1','1077','5','3'])
+    sim_price = fn.predict_random_forest_regressor(data,fn.sc,fn.rfr_model)
+    return f'Estimation: {sim_price}'
 
 
 if __name__ == '__main__':
