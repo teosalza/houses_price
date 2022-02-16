@@ -167,6 +167,15 @@ app.layout = html.Div(children=[
                         ],style={"padding-right":"50px","padding-left":"50px","flow-grow":"4"}),
                     html.H6(children=fn.dtr_score,style={"margin-top":"10px"}),
                 ]),
+                #Keras model
+                html.Div(children=[
+                    html.H5(children="Keras Model"),
+                    html.Div(children=[
+                        dash_table.DataTable(fn.k_data_errors.to_dict('records'), [{"name": i, "id": i} for i in fn.k_data_errors.columns], 
+                                style_cell={"color":"black"}),
+                        ],style={"padding-right":"50px","padding-left":"50px","flow-grow":"4"}),
+                    html.H6(children=fn.k_score,style={"margin-top":"10px"}),
+                ]),
                 html.Div(children=[]),
                 html.Div(children=[]),
             ],style={"display":"flex","justify-content":"center"}),

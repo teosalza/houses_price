@@ -1,16 +1,23 @@
 from cgi import print_directory
+import tensorflow as tf
 import pandas as pd
 import plotly.express as px
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score, mean_absolute_error, mean_squared_error
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
-
+from keras.models import Sequential
+from keras.layers.core import Dense, Activation
+from keras.layers import Dense
+import keras
+from keras.wrappers.scikit_learn import KerasRegressor
 import numpy as np
+from keras import backend as K
 
 '''--------- implementing functions --------'''
 
@@ -133,6 +140,12 @@ def _get_errors_performace_(y_test, y_pred, model):
 def get_scores(model,x_test,y_test):
     return "Total test score: "+ str(model.score(x_test, y_test))
 
+#Simulation score for keras model
+def get_scores_keras(model,x_test,y_test):
+    results = model.evaluate(x_test, y_test)
+    print("test loss, test acc:", results)
+    return "Total test score: " 
+
 #Get train amd test data
 def get_train_test_data(data_le,sc):
     X_sc = sc.fit_transform(data_le.drop("SalePrice", axis=1))
@@ -161,6 +174,7 @@ def get_decision_tree_regressor(x_train, y_train, x_test):
     y_pred = modelDTR.predict(x_test)
     return _get_errors_performace_(y_test,y_pred,"DecisionTreeRegressor"), y_pred, modelDTR
 
+#prediction by random forest regressor
 def predict_random_forest_regressor(data,sc,model):
     d = {'Fireplaces': [data[0]], 
             'YearBuilt': [data[1]],
@@ -180,6 +194,46 @@ def predict_random_forest_regressor(data,sc,model):
         return prediction
     except:
         return "Error"
+
+#Define keras model first time
+def create_keras_neural_network():
+    # model = Sequential()
+    # model.add(Dense(8, input_dim=11, activation='relu'))
+    # model.add(Dense(16, activation='relu'))
+    # model.add(Dense(1, activation='sigmoid'))
+
+    model = Sequential()
+    model.add(Dense(60,  input_dim=11))
+    model.add(Activation('tanh'))
+    model.add(Dense(24))
+    model.add(Activation('tanh'))
+    model.add(Dense(1))
+    return model
+
+def coeff_determination(y_true, y_pred):
+    SS_res =  K.sum(K.square( y_true-y_pred )) 
+    SS_tot = K.sum(K.square( y_true - K.mean(y_true) ) ) 
+    return ( 1 - SS_res/(SS_tot + K.epsilon()) )
+
+#Call saved keras model
+def get_keras_model(x_train, y_train, x_test):
+    modelK = keras.models.load_model("simple_keras_model")
+    modelK.fit(x_train, y_train)
+    y_pred = modelK.predict(x_test)
+    return _get_errors_performace_(y_test,y_pred,"DecisionTreeRegressor"), y_pred, modelK
+
+#Train keras model
+def train_keras_model(keras_model,x_train,y_train):
+    # optimizer = tf.keras.optimizers.Adam(lr=0.1)
+    optimizer = tf.keras.optimizers.SGD(learning_rate=0.001, momentum=1)
+    keras_model.compile(loss=tf.keras.losses.MeanAbsolutePercentageError(
+            reduction="auto", name="mean_absolute_percentage_error"
+        ), optimizer=optimizer, metrics=[coeff_determination])
+    keras_model.fit(x_train, y_train, epochs=150, batch_size=16)
+    keras_model.save("simple_keras_model")
+    # keras_model.compile(loss='mean_squared_error', optimizer='rmsprop')
+    # keras_model.fit(x_train, y_train, nb_epoch=240, batch_size=16, verbose=1)
+    return
 
 #global variable for front-end
 project_path = 'D:\esperimenti\programming_database\houses_price'
@@ -215,7 +269,12 @@ rfr_score = get_scores(rfr_model, x_test, y_test)
 #Decision Tree Regressor
 dtr_data_errors, dtr_y_pred, dtr_model = get_decision_tree_regressor(x_train,y_train, x_test)
 dtr_score = get_scores(dtr_model, x_test, y_test)
+#Keras model saved
+k_data_errors, k_y_pred, k_model = get_keras_model(x_train,y_train, x_test)
+k_score = get_scores_keras(k_model, x_test, y_test)
 
+# keras_model = create_keras_neural_network()
+# train_keras_model(keras_model,x_train,y_train)
 
 
 
