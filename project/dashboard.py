@@ -107,6 +107,49 @@ app.layout = html.Div(children=[
             ])
         ],style={"padding":"15px", "border":"1px solid rgb(54 54 54)","border-radius":"3px", "margin-bottom":"50px","background-color":"#252e3f"}),
         
+        #Statistical info 2
+        html.Div(children=[
+            html.H3(children="Stastistics price houses built"),
+            html.Div(children=[
+                #container
+                html.Div(children=[
+                    #Price per year building price
+                    html.Div(children=[
+                        dcc.Graph(
+                            id='pry_graph',
+                            figure=fn.pry                         
+                        )
+                    ],style={"flex-grow":"1"}),
+                    #House per Year average price
+                    html.Div(children=[
+                        dcc.Graph(
+                            id='pry_zn_graph',
+                            figure= fn.pry_zn
+                        )                    
+                    ],style={"flex-grow":"2"}),
+                ],style={"display":"flex","justify-content":"center"}),
+                #slider
+                html.Div(children=[
+                     dcc.RangeSlider(id="pry_rg",
+                                    min=1872,
+                                    max=2010,
+                                    step=5,
+                                    marks={
+                                        1872: {'label': '1872', 'style': {'color': 'white'}},
+                                        1900: {'label': '1900', 'style': {'color': 'white'}},
+                                        1925: {'label': '1925', 'style': {'color': 'white'}},
+                                        1950: {'label': '1950', 'style': {'color': 'white'}},
+                                        1975: {'label': '1975', 'style': {'color': 'white'}},
+                                        2000: {'label': '2000', 'style': {'color': 'white'}},
+                                        2010: {'label': '2010', 'style': {'color': 'white'}},
+                                    },
+                                    value=[1872,2010])
+
+                ],style={"padding":"15px","margin-top":"20px"})
+            ])
+        ],style={"padding":"15px", "border":"1px solid rgb(54 54 54)","border-radius":"3px", "margin-bottom":"50px","background-color":"#252e3f"}),
+        
+
         #Correlation description
         html.Div(children=[
             html.H3(children="Correlation between features and SalePrice"),
@@ -217,6 +260,15 @@ def update_hpy_ap_graph(year_choosen):
 @app.callback(Output("hpy_graph",'figure'),[Input("hpr_ap_rg",'value')])
 def update_hpy_graph(year_choosen):
     return fn.get_data_hpr(fn.clean_data,year_choosen[0],year_choosen[1])
+
+@app.callback(Output("pry_graph",'figure'),[Input("pry_rg",'value')])
+def update_pry_graph(year_choosen):
+    return fn.get_data_price_per_year(fn.clean_data,year_choosen[0],year_choosen[1])
+
+@app.callback(Output("pry_zn_graph",'figure'),[Input("pry_rg",'value')])
+def update_pry_zn_graph(year_choosen):
+    return fn.get_data_price_zone(fn.clean_data,year_choosen[0],year_choosen[1])
+
 
 @app.callback(Output(component_id="price-result",component_property="children"),
                 State('yb-input', 'value'),

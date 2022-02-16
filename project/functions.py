@@ -60,6 +60,25 @@ def get_data_hpr_ap(new_data,start,end):
         name="Nr. houses")
     return fig
 
+#Graph total price divided by zone
+def get_data_price_zone(new_data,start,end):
+    price_per_year = new_data.groupby(["YearBuilt","MSZoning"]).sum("SalePrice")
+    price_per_year.reset_index(level=1, inplace=True)
+    price_per_year.reset_index(level=0, inplace=True)
+    price_per_year[["YearBuilt","MSZoning","SalePrice"]]
+    price_per_year['MSZoning'] = price_per_year['MSZoning'].replace(['C (all)'],'Commercial')
+    price_per_year['MSZoning'] = price_per_year['MSZoning'].replace(['FV'],'Floating Village Residential')
+    price_per_year['MSZoning'] = price_per_year['MSZoning'].replace(['A'],'Agriculture')
+    price_per_year['MSZoning'] = price_per_year['MSZoning'].replace(['I'],'Industrial')
+    price_per_year['MSZoning'] = price_per_year['MSZoning'].replace(['RH'],'Resid. High Density')
+    price_per_year['MSZoning'] = price_per_year['MSZoning'].replace(['RL'],'Resid. Low Density')
+    price_per_year['MSZoning'] = price_per_year['MSZoning'].replace(['RP'],'Resid. Low Density Park')
+    price_per_year['MSZoning'] = price_per_year['MSZoning'].replace(['RM'],'Resid. Medium Density')
+
+    price_per_year =  price_per_year[ (price_per_year["YearBuilt"]>= start) & (price_per_year["YearBuilt"] <= end)]
+    figPie = px.pie(price_per_year, values="SalePrice", names="MSZoning")
+    return figPie
+
 #Number house per year and tipology of house
 def get_data_hpr(new_data,start,end):
     houses_per_year_type = new_data.groupby(["YearBuilt","MSZoning"]).count()
@@ -96,6 +115,29 @@ def get_data_ohe(new_data):
                 hover_data=['SalePrice', 'Feature'], color='SalePrice', title="One hot encoded correlation")
     return fig3
 
+#Distribution price per year
+def get_data_price_per_year(new_data,start,end):
+    price_per_year = new_data.groupby(["YearBuilt","MSZoning"]).sum("SalePrice")
+    price_per_year.reset_index(level=1, inplace=True)
+    price_per_year.reset_index(level=0, inplace=True)
+    price_per_year[["YearBuilt","MSZoning","SalePrice"]]
+    price_per_year['MSZoning'] = price_per_year['MSZoning'].replace(['C (all)'],'Commercial')
+    price_per_year['MSZoning'] = price_per_year['MSZoning'].replace(['FV'],'Floating Village Residential')
+    price_per_year['MSZoning'] = price_per_year['MSZoning'].replace(['A'],'Agriculture')
+    price_per_year['MSZoning'] = price_per_year['MSZoning'].replace(['I'],'Industrial')
+    price_per_year['MSZoning'] = price_per_year['MSZoning'].replace(['RH'],'Resid. High Density')
+    price_per_year['MSZoning'] = price_per_year['MSZoning'].replace(['RL'],'Resid. Low Density')
+    price_per_year['MSZoning'] = price_per_year['MSZoning'].replace(['RP'],'Resid. Low Density Park')
+    price_per_year['MSZoning'] = price_per_year['MSZoning'].replace(['RM'],'Resid. Medium Density')
+
+    price_per_year =  price_per_year[ (price_per_year["YearBuilt"]>= start) & (price_per_year["YearBuilt"] <= end)]
+    figP = px.bar(price_per_year, 
+        x="YearBuilt",
+        y="SalePrice", 
+        color="MSZoning", 
+        title="Distribution total price per year",
+        labels={'SalePrice':'Total Price','YearBuilt':'Building year'})
+    return figP
 #Correlation graph with label encoding
 def get_data_label_enc(data_le):
     corr_map_le = data_le.corr().sort_values("SalePrice")["SalePrice"].reset_index(level=0).rename(columns={"index":"Feature"})
@@ -253,6 +295,8 @@ data_le, le_mapping = _create_label_encoded_data_(clean_data)
 
 hpr_ap = get_data_hpr_ap(clean_data,1872,2010)
 hpr = get_data_hpr(clean_data,1872,2010)
+pry = get_data_price_per_year(clean_data,1872,2010)
+pry_zn = get_data_price_zone(clean_data,1872,2010)
 ohe_corr = get_data_ohe(clean_data)
 label_enc_corr = get_data_label_enc(data_le)
 scatter_corr = get_data_correlazion_scatter(data_le)
