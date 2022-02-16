@@ -174,7 +174,7 @@ app.layout = html.Div(children=[
                         dash_table.DataTable(fn.k_data_errors.to_dict('records'), [{"name": i, "id": i} for i in fn.k_data_errors.columns], 
                                 style_cell={"color":"black"}),
                         ],style={"padding-right":"50px","padding-left":"50px","flow-grow":"4"}),
-                    html.H6(children=fn.k_score,style={"margin-top":"10px"}),
+                    # html.H6(children=fn.k_score,style={"margin-top":"10px"}),
                 ]),
                 html.Div(children=[]),
                 html.Div(children=[]),
@@ -183,7 +183,7 @@ app.layout = html.Div(children=[
 
         #Estimate your house price
         html.Div(children=[
-            html.H3(children="Estimate your house price"),
+            html.H3(children="Estimate your house price (with random forest regressor)"),
             html.Div(children=[
                 html.Div(children=[
                     html.Div(children=[
@@ -233,8 +233,8 @@ def update_hpy_graph(year_choosen):
                 Input('submit-val', 'n_clicks')
                 )
 def update_input_selection(yb_val,trag_val,fp_val,br_val,fsf_val,bsf_val,ga_val,gc_val,la_val,oq_val,zn_val,sub):
-    #data = np.array([fp_val,yb_val,trag_val,br_val,fsf_val,bsf_val,ga_val,gc_val,la_val,oq_val,fn.le_mapping[fn.diz_mszoning[zn_val]]])
-    data = np.array(['2','1939','5','1','1077','991','205','1','1077','5','3'])
+    data = np.array([fp_val,yb_val,trag_val,br_val,fsf_val,bsf_val,ga_val,gc_val,la_val,oq_val,fn.le_mapping[fn.diz_mszoning[zn_val]]])
+    # data = np.array(['2','1939','5','1','1077','991','205','1','1077','5','3'])
     sim_price = fn.predict_random_forest_regressor(data,fn.sc,fn.rfr_model)
     return f'Estimation: {sim_price}'
 

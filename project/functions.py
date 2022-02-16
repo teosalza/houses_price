@@ -197,17 +197,17 @@ def predict_random_forest_regressor(data,sc,model):
 
 #Define keras model first time
 def create_keras_neural_network():
-    # model = Sequential()
-    # model.add(Dense(8, input_dim=11, activation='relu'))
-    # model.add(Dense(16, activation='relu'))
-    # model.add(Dense(1, activation='sigmoid'))
-
     model = Sequential()
-    model.add(Dense(60,  input_dim=11))
-    model.add(Activation('tanh'))
-    model.add(Dense(24))
-    model.add(Activation('tanh'))
-    model.add(Dense(1))
+    model.add(Dense(8, input_dim=11, activation='relu'))
+    model.add(Dense(16, activation='relu'))
+    model.add(Dense(1, activation='linear'))
+
+    # model = Sequential()
+    # model.add(Dense(60,  input_dim=11))
+    # model.add(Activation('tanh'))
+    # model.add(Dense(24))
+    # model.add(Activation('tanh'))
+    # model.add(Dense(1))
     return model
 
 def coeff_determination(y_true, y_pred):
@@ -224,13 +224,13 @@ def get_keras_model(x_train, y_train, x_test):
 
 #Train keras model
 def train_keras_model(keras_model,x_train,y_train):
-    # optimizer = tf.keras.optimizers.Adam(lr=0.1)
-    optimizer = tf.keras.optimizers.SGD(learning_rate=0.001, momentum=1)
+    optimizer = tf.keras.optimizers.Adam(lr=0.005)
+    # optimizer = tf.keras.optimizers.SGD(learning_rate=0.001, momentum=1)
     keras_model.compile(loss=tf.keras.losses.MeanAbsolutePercentageError(
             reduction="auto", name="mean_absolute_percentage_error"
-        ), optimizer=optimizer, metrics=[coeff_determination])
-    keras_model.fit(x_train, y_train, epochs=150, batch_size=16)
-    keras_model.save("simple_keras_model")
+        ), optimizer=optimizer, metrics=[tf.keras.metrics.MeanSquaredError()])
+    keras_model.fit(x_train, y_train, epochs=2000, batch_size=16)
+    keras_model.save("simple_keras_model_new")
     # keras_model.compile(loss='mean_squared_error', optimizer='rmsprop')
     # keras_model.fit(x_train, y_train, nb_epoch=240, batch_size=16, verbose=1)
     return
